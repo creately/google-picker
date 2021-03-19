@@ -1,6 +1,6 @@
 {
   "name": "@creately/google-picker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simple google picker package.",
   "main": "index.js",
   "scripts": {

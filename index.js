@@ -17,26 +17,31 @@ module.exports = function picker(config) {
   
       var pickerApiLoaded = false;
       var oauthToken;
-  
-      loadPickerAPIScript();
-  
+
       // Use the Google API Loader script to load the google.picker script.
       var loadPicker =  function() {
         gapi.load('auth', {'callback': onAuthApiLoad});
         gapi.load('picker', {'callback': onPickerApiLoad});
-        return 
       }
+
+      loadPickerAPIScript();
   
       function loadPickerAPIScript() {
-          const script = document.createElement('script');
-          script.src = `https://apis.google.com/js/api.js?key=${developerKey}`;
-          script.async = true;
-          script.defer = true;
-          script.onload = () => {
+          const src = `https://apis.google.com/js/api.js?key=${developerKey}`;
+          let script = document.body.querySelector( `script[src="${src}"]` );
+          if ( script ) {
             resolve( loadPicker );
-          };
-          script.onerror = reject;
-          document.body.appendChild( script );
+          } else {
+            script = document.createElement('script');
+            script.src = src;
+            script.async = true;
+            script.defer = true;
+            script.onload = () => {
+              resolve( loadPicker );
+            };
+            script.onerror = reject;
+            document.body.appendChild( script );
+          }
       }
   
       function onAuthApiLoad() {
@@ -63,7 +68,9 @@ module.exports = function picker(config) {
   
       // Create and render a Picker object for searching images.
       function createPicker() {
-          if (pickerApiLoaded && oauthToken) {
+          if(this.picker) {
+            this.picker.setVisible(true);
+          } else if (pickerApiLoaded && oauthToken) {
               var view = new google.picker.View(google.picker.ViewId.DOCS);
               view.setMimeTypes(mimeTypes);
               var picker = new google.picker.PickerBuilder()
@@ -77,6 +84,7 @@ module.exports = function picker(config) {
                   .setCallback(pickerCallback)
                   .build();
               picker.setVisible(true);
+              this.picker = picker;
           }
       }
   
